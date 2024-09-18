@@ -2,14 +2,14 @@ import type { PineconeRecord, RecordMetadata } from "@pinecone-database/pinecone
 import { OpenAIEmbeddings } from "@langchain/openai";
 export const dimension = 1536;
 export const namespace = 'resumes';
-export const embeddingModel = "text-embedding-3-large"
+export const embeddingModel = "text-embedding-3-small"
 export const documentId = 1
 import { OpenAI } from "@langchain/openai";
 
 export function chunkTextByMultiParagraphs(
     text: string,
-    maxChunkSize = 1500,
-    minChunkSize = 500
+    maxChunkSize = 300,
+    minChunkSize = 100
     ): string[] {
     const chunks: string[] = [];
     let currentChunk = "";
@@ -63,6 +63,7 @@ export function chunkTextByMultiParagraphs(
             });
             for (let i=0; i<chunks.length; i += 1){
                 const embeddedChunk = await embeddings.embedQuery(chunks[i])
+                // console.log(embeddedChunk)
                 embeds.push(embeddedChunk);
             }
 
@@ -80,24 +81,31 @@ export function chunkTextByMultiParagraphs(
 
 export async function upsertDocument(index: any, document: any, namespaceId: string) {
     // Adjust to use namespaces if you're organizing data that way
-    const namespace = index.namespace(namespaceId);
 
-    
-    const vectors: PineconeRecord<RecordMetadata>[] = document.embeddings.map(
-    (embedding: any) => ({
-        id: embedding.id,
-        values: embedding.values,
-        metadata: {
-        text: embedding.text,
-        referenceURL: document.documentUrl,
-        },
-    })
-    );
+    try{
 
-    // Batch the upsert operation
-    const batchSize = 200;
-    for (let i = 0; i < vectors.length; i += batchSize) {
-    const batch = vectors.slice(i, i + batchSize);
-    await namespace.upsert(batch);
+        const namespace = index.namespace(namespaceId);
+
+        const vectors: PineconeRecord<RecordMetadata>[] = document.embeddings.map(
+            (embedding: any) => ({
+                id: embedding.id,
+                values: embedding.values,
+                metadata: {
+                text: embedding.text,
+                referenceURL: document.documentUrl,
+                },
+            })
+            );
+            // Batch the upsert operation
+            const batchSize = 200;
+            for (let i = 0; i < vectors.length; i += batchSize) {
+            const batch = vectors.slice(i, i + batchSize);
+            
+            await namespace.upsert(batch);
+            }
+
+    } catch(error) {
+        console.log(`An error occured upserting the information, ${error}`)
     }
+    
 }
