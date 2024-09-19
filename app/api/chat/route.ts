@@ -5,8 +5,9 @@ import { convertToCoreMessages, streamText } from 'ai';
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
-  const { messages } = await req.json();
+  const { messages, namespaceId } = await req.json();
 
+  //given the messages and the namespaceId, generate 
   const result = await streamText({
     model: openai('gpt-4-turbo'),
     system: 'You are a helpful assistant.',
