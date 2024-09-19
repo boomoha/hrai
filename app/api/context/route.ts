@@ -41,8 +41,4 @@ export async function POST(req: Request){
         return Response.json({error: `An error occured generating the context:, ${error}`})
     }
 
-    
-
-    
-
 }

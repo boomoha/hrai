@@ -7,27 +7,38 @@ export const maxDuration = 30;
 export async function POST(req: Request) {
   const { messages, namespaceId } = await req.json();
 
-  //given the messages and the namespaceId, generate the context
-  //return the context
 
-  const lastMessage = messages[0].content
+  try{
 
-  const response = await fetch(`${process.env.SERVER_URL}/api/context`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      message: lastMessage,
-    }),
-  });
+    const systemPrompt = "You are a helpful HR assistant bot. Your primary role is to efficiently read and summarize data from employee resumes. Each time you receive a context about a question, you should analyze the provided information and respond in a clear, concise, and well-structured format. Ensure that your summaries highlight key qualifications, experiences, and skills relevant to the inquiry. Always maintain a professional tone and provide actionable insights based on the resume data."
 
-  const { context } = await response.json()
-  const result = await streamText({
-    model: openai('gpt-4-turbo'),
-    system: 'You are a helpful assistant.',
-    messages: messages,
-  });
+    const lastMessage = messages[0].content
+    console.log(`The last message was: ${lastMessage}`)
 
-  return result.toDataStreamResponse();
+    const apiUrl = `${process.env.SERVER_URL}/api/context`;
+    console.log(`Fetching from: ${apiUrl}`);
+
+    const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+        "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+        message: lastMessage,
+        }),
+    });
+
+    const { context } = await response.json()
+
+    const result = await streamText({
+        model: openai('gpt-4-turbo'),
+        system: `${systemPrompt}. START OF THE CONTENT | ${context} | END OF THE CONTEXT`,
+        messages: messages,
+    });
+
+    return result.toDataStreamResponse();
+  } catch (error) {
+    return Response.json({error: `An error occured sending the message from OpenAI: ${error}`})
+  }
+  
 }
