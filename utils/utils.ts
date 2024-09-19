@@ -8,6 +8,7 @@ export const dimension = 1536;
 export const namespace = 'resumes';
 export const embeddingModel = "text-embedding-3-small"
 export const documentId = 1
+export const indexName = 'hrai'
 export type Metadata = {
     referenceURL: string;
     text: string;
