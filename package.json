@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-<<<<<<< HEAD
     "@ai-sdk/openai": "^0.0.60",
     "@langchain/community": "^0.3.1",
     "@langchain/openai": "^0.3.0",
@@ -20,10 +19,6 @@
     "next": "14.2.11",
     "openai-edge": "^1.2.2",
     "pdf-parse": "^1.1.1",
-=======
-    "lucide-react": "^0.441.0",
-    "next": "14.2.11",
->>>>>>> 65439ffd5e0507e91a576edece127ef5df88ca64
     "react": "^18",
     "react-dom": "^18"
   },
