@@ -1,14 +1,17 @@
-import { Configuration, OpenAIApi } from "openai-edge";
-import { Message, OpenAIStream, StreamingTextResponse } from "ai";
+import { openai } from '@ai-sdk/openai';
+import { convertToCoreMessages, streamText } from 'ai';
 
+// Allow streaming responses up to 30 seconds
+export const maxDuration = 30;
 
-const config = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+
+  const result = await streamText({
+    model: openai('gpt-4-turbo'),
+    system: 'You are a helpful assistant.',
+    messages: messages,
   });
-  const openai = new OpenAIApi(config);
 
-
-export async function POST(req: Request, res:Response){
-
-    const body = await req.json()
+  return result.toDataStreamResponse();
 }
